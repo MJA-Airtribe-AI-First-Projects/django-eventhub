@@ -15,33 +15,32 @@ Django ORM**, with SQLite as the default database.
 
 ## ✨ Features
 
--   🎟️ Create, retrieve, update, and delete events
--   🔎 Filter events by status and venue
--   🪑 Reserve one or more seats for an event
--   ✅ Validate seat counts and event status
--   🚫 Reject reservations when there are not enough seats available
--   ↩️ Cancel reservations and restore the reserved seats
--   🔍 Filter reservations by event ID
--   📊 Include the number of confirmed reservations in event responses
--   🕒 Automatically record creation timestamps
--   🧾 Validate request data with DRF serializers
--   🪵 Log request method, path, response status, and duration using
-    custom middleware
--   🧭 Use ViewSets and a DefaultRouter for RESTful URL routing
+- 🎟️ Create, retrieve, update, and delete events
+- 🔎 Filter events by status and venue
+- 🪑 Reserve one or more seats for an event
+- ✅ Validate seat counts and event status
+- 🚫 Reject reservations when there are not enough seats available
+- ↩️ Cancel reservations and restore the reserved seats
+- 🔍 Filter reservations by event ID
+- 📊 Include the number of confirmed reservations in event responses
+- 🕒 Automatically record creation timestamps
+- 🧾 Validate request data with DRF serializers
+- 🪵 Log request method, path, response status, and duration using
+  custom middleware
+- 🧭 Use ViewSets and a DefaultRouter for RESTful URL routing
 
 ------------------------------------------------------------------------
 
 ## 🛠️ Tech Stack
 
-| Technology            | Purpose                      |
-| --------------------- | ---------------------------- |
-| Python                | Programming language         |
-| Django                | Backend web framework        |
-| Django REST Framework | REST API development, serializers, and ViewSets         |
-| Django ORM            | Models and database Queries |
-| PostgreSQL           | Databse                  |
-| Postman               | API testing                  |
-
+| Technology            | Purpose                                         |
+|-----------------------|-------------------------------------------------|
+| Python                | Programming language                            |
+| Django                | Backend web framework                           |
+| Django REST Framework | REST API development, serializers, and ViewSets |
+| Django ORM            | Models and database Queries                     |
+| PostgreSQL            | Databse                                         |
+| Postman               | API testing                                     |
 
 ------------------------------------------------------------------------
 
@@ -230,15 +229,15 @@ eventhub/
 
 An `Event` stores information about an event and its seat inventory.
 
-| Field | Description |
-|:---|:---:|
-| `title` | Event title |
-| `venue` | Event location |
-| `date` | Event date |
-| `total_seats` | Total capacity |
-| `available_seats` | Seats currently available to reserve |
-| `status` | `upcoming`, `ongoing`, `completed`, or `cancelled` |
-| `created_at` | Automatically recorded creation timestamp |
+| Field             |                    Description                     |
+|:------------------|:--------------------------------------------------:|
+| `title`           |                    Event title                     |
+| `venue`           |                   Event location                   |
+| `date`            |                     Event date                     |
+| `total_seats`     |                   Total capacity                   |
+| `available_seats` |        Seats currently available to reserve        |
+| `status`          | `upcoming`, `ongoing`, `completed`, or `cancelled` |
+| `created_at`      |     Automatically recorded creation timestamp      |
 
 The event response also includes `reservations_count`, a computed count
 of confirmed reservations.
@@ -247,14 +246,14 @@ of confirmed reservations.
 
 A `Reservation` represents seats reserved by an attendee for an event.
 
-| Field | Description |
-|:---|:---:|
-| `event` | Foreign key to the related event |
-| `attendee_name` | Attendee's name |
-| `attendee_email` | Attendee's email address |
-| `seats_reserved` | Number of seats reserved |
-| `status` | `confirmed` or `cancelled` |
-| `created_at` | Automatically recorded creation timestamp |
+| Field            |                Description                |
+|:-----------------|:-----------------------------------------:|
+| `event`          |     Foreign key to the related event      |
+| `attendee_name`  |              Attendee's name              |
+| `attendee_email` |         Attendee's email address          |
+| `seats_reserved` |         Number of seats reserved          |
+| `status`         |        `confirmed` or `cancelled`         |
+| `created_at`     | Automatically recorded creation timestamp |
 
 ### Relationship
 
@@ -271,15 +270,15 @@ URL.
 
 ## 🎫 Event APIs
 
-| Method | Endpoint | Description |
-|:---:|:---|:---:|
-| `GET` | `/api/events/` | List events |
-| `POST` | `/api/events/` | Create an event |
-| `GET` | `/api/events/<id>/` | Retrieve an event |
-| `PUT` | `/api/events/<id>/` | Update an event |
-| `DELETE` | `/api/events/<id>/` | Delete an event |
-| `GET` | `/api/events/?status=upcoming` | Filter by status |
-| `GET` | `/api/events/?venue=bangalore` | Filter by venue |
+|  Method  | Endpoint                       |    Description    |
+|:--------:|:-------------------------------|:-----------------:|
+|  `GET`   | `/api/events/`                 |    List events    |
+|  `POST`  | `/api/events/`                 |  Create an event  |
+|  `GET`   | `/api/events/<id>/`            | Retrieve an event |
+|  `PUT`   | `/api/events/<id>/`            |  Update an event  |
+| `DELETE` | `/api/events/<id>/`            |  Delete an event  |
+|  `GET`   | `/api/events/?status=upcoming` | Filter by status  |
+|  `GET`   | `/api/events/?venue=bangalore` |  Filter by venue  |
 
 ### Filter events
 
@@ -339,16 +338,16 @@ The event response includes a computed `reservations_count` field.
 
 ## 🪑 Reservation APIs
 
-| Method | Endpoint | Description |
-|:---:|:---|:---:|
-| `GET` | `/api/reservations/` | List reservations |
-| `POST` | `/api/reservations/` | Create a reservation |
-| `GET` | `/api/reservations/<id>/` | Retrieve a reservation |
-| `GET` | `/api/reservations/?event_id=1` | Filter by event |
+| Method | Endpoint                         |              Description               |
+|:------:|:---------------------------------|:--------------------------------------:|
+| `GET`  | `/api/reservations/`             |           List reservations            |
+| `POST` | `/api/reservations/`             |          Create a reservation          |
+| `GET`  | `/api/reservations/<id>/`        |         Retrieve a reservation         |
+| `GET`  | `/api/reservations/?event_id=1`  |            Filter by event             |
 | `POST` | `/api/reservations/<id>/cancel/` | Cancel a reservation and restore seats |
 
-The standard create, retrieve, update, and delete routes are provided by
-DRF's `ModelViewSet`. The custom cancellation route is provided by an
+The list, create, and retrieve routes are provided by DRF's `ModelViewSet`.
+The custom cancellation route is provided by an
 `@action(detail=True, methods=['post'])` method.
 
 ### Filter reservations by event
@@ -418,7 +417,7 @@ similar to:
 
 ### Cancel a reservation
 
-**POST** 
+**POST**
 
 ```text
 /api/reservations/1/cancel/
@@ -428,9 +427,9 @@ No request body is required.
 
 On successful cancellation:
 
--   The reservation status changes to `cancelled`.
--   The reserved seats are returned to the event's `available_seats`.
--   The updated reservation is returned in the response.
+- The reservation status changes to `cancelled`.
+- The reserved seats are returned to the event's `available_seats`.
+- The updated reservation is returned in the response.
 
 Attempting to cancel an already-cancelled reservation returns
 `400 Bad Request`.
@@ -454,6 +453,21 @@ registered in the `MIDDLEWARE` list in `eventhub/settings.py`.
 ------------------------------------------------------------------------
 
 # 🧠 Design Decision
+
+### Why use `time.monotonic()` in the request logging middleware?
+
+The middleware uses `time.monotonic()` to measure elapsed request time. Unlike
+wall-clock time, a monotonic clock is not affected by system clock changes, so
+the duration remains reliable even if the system time is adjusted while a
+request is being handled.
+
+### Why don't we customize `get_queryset()`?
+
+Both viewsets use `get_queryset()` to return all events or reservations. We
+don't add request-specific restrictions because the current API has no
+user-specific data access rules. Event and reservation filtering is handled
+by the configured filter fields. If access later needs to depend on the
+requesting user, `get_queryset()` is the right place to scope those results.
 
 ### Why keep reservation creation and seat deduction together?
 
@@ -485,18 +499,18 @@ python manage.py runserver
 
 Recommended test flow:
 
-1.  **Create an event** --- `POST /api/events/`
-2.  **List events** --- `GET /api/events/`
-3.  **Filter events by status** --- `GET /api/events/?status=upcoming`
-4.  **Filter events by venue** --- `GET /api/events/?venue=bangalore`
-5.  **Create a reservation** --- `POST /api/reservations/`
-6.  **Verify seat deduction** --- retrieve the event and check
-    `available_seats`
-7.  **Attempt to overbook** --- request more seats than are available
-    and verify `400 Bad Request`
-8.  **Cancel a reservation** --- `POST /api/reservations/<id>/cancel/`
-9.  **Verify seat restoration** --- retrieve the event and check
-    `available_seats`
+1. **Create an event** --- `POST /api/events/`
+2. **List events** --- `GET /api/events/`
+3. **Filter events by status** --- `GET /api/events/?status=upcoming`
+4. **Filter events by venue** --- `GET /api/events/?venue=bangalore`
+5. **Create a reservation** --- `POST /api/reservations/`
+6. **Verify seat deduction** --- retrieve the event and check
+   `available_seats`
+7. **Attempt to overbook** --- request more seats than are available
+   and verify `400 Bad Request`
+8. **Cancel a reservation** --- `POST /api/reservations/<id>/cancel/`
+9. **Verify seat restoration** --- retrieve the event and check
+   `available_seats`
 10. **Filter reservations by event** ---
     `GET /api/reservations/?event_id=<id>`
 11. **Check middleware logs** --- inspect the terminal output for
@@ -558,15 +572,15 @@ POST    /api/reservations/<id>/cancel/
 
 Built as a Django REST Framework backend project to practice:
 
--   Django models and ORM relationships
--   DRF serializers and validation
--   ModelViewSets and routers
--   Query parameter filtering
--   Custom actions with `@action`
--   Middleware and request logging
--   Reservation business logic
--   Database migrations
--   API testing with Postman
+- Django models and ORM relationships
+- DRF serializers and validation
+- ModelViewSets and routers
+- Query parameter filtering
+- Custom actions with `@action`
+- Middleware and request logging
+- Reservation business logic
+- Database migrations
+- API testing with Postman
 
 ------------------------------------------------------------------------
 

@@ -1,6 +1,8 @@
-import time, logging
+import logging
+import time
 
 logger = logging.getLogger(__name__)
+
 
 class RequestLoggingMiddleware:
 
@@ -8,8 +10,8 @@ class RequestLoggingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        start_time = time.time()
+        start_time = time.monotonic()
         response = self.get_response(request)
-        duration = time.time() - start_time
+        duration = time.monotonic() - start_time
         logger.info(f"{request.method} {request.path} - {response.status_code} - {duration:.2f}s")
         return response

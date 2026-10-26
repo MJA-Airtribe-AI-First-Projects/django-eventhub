@@ -1,13 +1,18 @@
+import logging
 from typing import override
 
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from events.filters import EventFilter
 from events.models import Event, Reservation
 from events.serializers import EventSerializer, ReservationSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class EventsModelViewSet(ModelViewSet):
@@ -41,7 +46,7 @@ class EventsModelViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         """Validate request data and create an event."""
         try:
-            data = request.data
+            data = request.data.copy()
 
             # If capacity is omitted, start with every seat available.
             if data.get("available_seats") is None:
@@ -63,14 +68,22 @@ class EventsModelViewSet(ModelViewSet):
             self.perform_create(serializer)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except APIException:
+            raise
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception(str(e))
+            logger.exception("Failed to create event")
+            return Response(
+                {"error": "An internal server error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     @override
     def update(self, request, *args, **kwargs):
         """Update an event and adjust available seats when capacity changes."""
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
         try:
-            instance = self.get_object()
             data = request.data.copy()
 
             # Adjust remaining seats by the same amount as capacity when omitted.
@@ -85,15 +98,17 @@ class EventsModelViewSet(ModelViewSet):
                         instance.available_seats + total_seats - instance.total_seats
                 )
 
-            serializer = self.serializer_class(instance, data=data)
+            serializer = self.serializer_class(instance, data=data, partial=partial)
 
             # Validate capacity constraints before saving the updated event.
             if not serializer.is_valid():
                 return self.__validation_error(serializer)
 
-            if self.__venue_date_exists(serializer.validated_data["venue"],
-                                        serializer.validated_data["date"],
-                                        exclude_pk=instance.pk):
+            if self.__venue_date_exists(
+                    serializer.validated_data.get("venue", instance.venue),
+                    serializer.validated_data.get("date", instance.date),
+                    exclude_pk=instance.pk,
+            ):
                 return Response(
                     {"error": "An event at this venue on this date already exists."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -102,15 +117,24 @@ class EventsModelViewSet(ModelViewSet):
             self.perform_update(serializer)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except APIException:
+            raise
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception(str(e))
+            logger.exception("Failed to update event")
+            return Response(
+                {"error": "An internal server error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class ReservationModelViewSet(ModelViewSet):
     """Handle reservation creation, updates, listing, and cancellation."""
 
+    http_method_names = ['get', 'post', 'head', 'options']
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+    filter_backends = [DjangoFilterBackend]
     filterset_fields = ('event_id',)
 
     @action(detail=True, methods=['post'], url_path='cancel')
