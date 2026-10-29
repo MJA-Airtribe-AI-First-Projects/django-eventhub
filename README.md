@@ -9,7 +9,7 @@ cancel reservations. The API tracks seat availability and validates
 reservation requests to help prevent overbooking.
 
 The project is built with **Python, Django, Django REST Framework, and
-Django ORM**, with SQLite as the default database.
+Django ORM**, with PostgreSQL as the default database.
 
 ------------------------------------------------------------------------
 
@@ -199,7 +199,7 @@ eventhub/
 ├── manage.py
 ├── requirements.txt
 ├── README.md
-├── db.sqlite3
+├── .env
 │
 ├── eventhub/
 │   ├── __init__.py
